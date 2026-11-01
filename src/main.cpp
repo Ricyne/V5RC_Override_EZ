@@ -298,10 +298,13 @@ void opcontrol() {
 
     if (master.get_digital(DIGITAL_LEFT)) {
       angle.move_absolute(angle_running, 127);
+      pros::delay(100);  // Add a small delay to prevent rapid toggling
     }  else {
       angle.move_absolute(angle_running, 127);
+      pros::delay(100); 
     }
     pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
 
   }
 }
+//bimo 8.04
