@@ -11,8 +11,8 @@
 
 // Chassis constructor
 ez::Drive chassis(
-    {1, 2, 3},     // Left Chassis Ports (negative port will reverse it!)
-    {-4, -5, -6},  // Right Chassis Ports (negative port will reverse it!)
+    {20, 16},     // Left Chassis Ports (negative port will reverse it!)
+    {-14, -17},  // Right Chassis Ports (negative port will reverse it!)
 
     7,      // IMU Port
     3.25,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
@@ -75,7 +75,8 @@ void initialize() {
       {"Boomerang\n\nGo to (0, 24, 45) then come back to (0, 0, 0)", odom_boomerang_example},
       {"Boomerang Pure Pursuit\n\nGo to (0, 24, 45) on the way to (24, 24) then come back to (0, 0, 0)", odom_boomerang_injected_pure_pursuit_example},
       {"Measure Offsets\n\nThis will turn the robot a bunch of times and calculate your offsets for your tracking wheels.", measure_offsets},
-  });
+    }
+  );
 
   // Initialize chassis and auton selector
   chassis.initialize();
@@ -245,7 +246,9 @@ void ez_template_extras() {
 void opcontrol() {
   // This is preference to what you like to drive on
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
-
+  bool intake_running = false;
+  int angle_running = 400;
+  bool claw_running = false;
   while (true) {
     // Gives you some extras to make EZ-Template ezier
     ez_template_extras();
@@ -257,15 +260,48 @@ void opcontrol() {
     // chassis.opcontrol_arcade_flipped(ez::SINGLE);   // Flipped single arcade
 
     if (master.get_digital(DIGITAL_L1)) {
-      intake_motors.move(127);
+      cascade.move(127);
     } else if (master.get_digital(DIGITAL_L2)) {
-      intake_motors.move(-127);
+      cascade.move(-127);
     } else {
-      intake_motors.move(0); 
+      cascade.move(0);
     }
 
-    silktouch.button_toggle(master.get_digital(DIGITAL_R1));
+    if (master.get_digital_new_press(DIGITAL_R1)) {
+      intake_running = !intake_running;
+    }
 
+    // Spin the intake if intake_running is true
+    if (intake_running) {
+      intake.move(-127);
+    }
+    // Stop the intake if intake_running is false 
+    else {
+      intake.move(0);
+    }
+    
+    if (master.get_digital(DIGITAL_UP)) {
+      claw_running = !claw_running;
+      pros::delay(200);  // Add a small delay to prevent rapid toggling
+    }
+    if (claw_running) {
+      claw.move(50);
+    }
+    // Stop the claw if claw_running is false
+    else {
+      claw.move(-50);
+    }
+
+    if (master.get_digital_new_press(DIGITAL_LEFT)) {
+      angle_running = -1 * angle_running;
+    }
+
+    if (master.get_digital(DIGITAL_LEFT)) {
+      angle.move_absolute(angle_running, 127);
+    }  else {
+      angle.move_absolute(angle_running, 127);
+    }
     pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
+
   }
 }

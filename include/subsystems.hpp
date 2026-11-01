@@ -13,6 +13,7 @@ extern Drive chassis;
 // inline pros::Motor intake(1);
 // inline pros::adi::DigitalIn limit_switch('A');
 
-inline pros::MotorGroup intake_motors({10,11});
-
-inline ez::Piston silktouch('A'); 
+inline pros::MotorGroup cascade({8,-5});
+inline pros::Motor intake({4});
+inline pros::Motor claw({3});
+inline pros::Motor angle({15});

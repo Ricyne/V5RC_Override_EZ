@@ -380,6 +380,7 @@ void measure_offsets() {
 
 
 
-void LongGoalRed() {
-  
+void long_goal_red() {
+  chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
 }
